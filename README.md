@@ -56,3 +56,6 @@ This guide explains how to set up and run the two Python scripts for ScyllaDB:
     Total Calls: 21, Successful Calls: 17
     Percentage of successful calls: 80.95%
     ```
+
+### Sample Data
+![Output Data](/src/data_output.png)
