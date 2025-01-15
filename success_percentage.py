@@ -1,11 +1,18 @@
 from cassandra.cluster import Cluster
 from cassandra.query import ConsistencyLevel
 
-class callDrop:
+class CallDrop:
     def __init__(self):
-        self.cluster = Cluster(contact_points=["127.0.0.1"], port=9042)
-        self.session = self.cluster.connect(keyspace="calldrop")  # Update with your keyspace name
-        self.session.default_consistency_level = ConsistencyLevel.QUORUM
+        self.cluster = None
+        self.session = None
+        try:
+            self.cluster = Cluster(['172.31.38.90', '172.31.35.22', '172.31.42.145'], port=9042)
+            self.session = self.cluster.connect()
+            self.session.set_keyspace('calldrop')
+            self.session.default_consistency_level = ConsistencyLevel.QUORUM
+            print("Connected to ScyllaDB and set keyspace 'calldrop'!")
+        except Exception as e:
+            print(f"Error connecting to ScyllaDB: {e}")
 
     def get_success_percentage(self, start_time, end_time, phone_number=None):
         print("Call Records for the Given Time Range".center(50, "="))
@@ -21,7 +28,7 @@ class callDrop:
             query += " AND phone = %s ALLOW FILTERING"
             params = (start_time, end_time, phone_number)
         else:
-            query += "ALLOW FILTERING"
+            query += " ALLOW FILTERING"
             params = (start_time, end_time)
         
         try:
@@ -54,8 +61,11 @@ class callDrop:
 
 # Main function to run the script
 if __name__ == "__main__":
-    app = callDrop()
-    start_time = int(input("Enter start time in seconds): "))
+    app = CallDrop()
+    start_time = int(input("Enter start time in seconds: "))
     end_time = int(input("Enter end time in seconds: "))
-    phone_number = int(input("Enter phone number (Optional): "))
+    
+    phone_number_input = input("Enter phone number (Optional): ")
+    phone_number = int(phone_number_input) if phone_number_input.strip() else None  # Handle empty input
+    
     app.get_success_percentage(start_time, end_time, phone_number)

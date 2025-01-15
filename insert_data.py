@@ -4,19 +4,20 @@ import random
 
 class CallDrop:
     def __init__(self):
+        self.cluster = None
+        self.session = None
         try:
-            self.cluster = Cluster(['127.0.0.1'], port=9042)
+            self.cluster = Cluster(['172.31.38.90', '172.31.35.22', '172.31.42.145'], port=9042)
             self.session = self.cluster.connect()
             self.session.set_keyspace('calldrop')
             self.session.default_consistency_level = ConsistencyLevel.QUORUM
             print("Connected to ScyllaDB and set keyspace 'calldrop'!")
         except Exception as e:
             print(f"Error connecting to ScyllaDB: {e}")
-            self.session = None
 
     def generate_call_records(self):
         """Generate random call records."""
-        users = [random.randint(1000000000, 9999999999) for _ in range(15)] 
+        users = [random.randint(1000000000, 9999999999) for _ in range(15)]
         towers = [f'Tower-{i}' for i in range(1, 11)]  # 10 cell tower IDs
         records = []
 
@@ -81,6 +82,7 @@ if __name__ == "__main__":
     app = CallDrop()
     try:
         records = app.generate_call_records()
-        app.insert_call_records(records)
+        if app.session:
+            app.insert_call_records(records)
     finally:
         app.close()
